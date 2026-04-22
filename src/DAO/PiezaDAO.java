@@ -3,45 +3,18 @@ package DAO;// Archivo: ArticuloDAO.java
 
 
 import POJO.Articulo;
-import POJO.Fabricante;
+import POJO.Pieza;
 
 import java.sql.*;
 import java.util.ArrayList;
 
-public class FabricanteDAO implements InterfazDAO<Fabricante> {
+public class PiezaDAO implements InterfazDAO<Pieza> {
 
 
-    public ArrayList<Fabricante> obtenerTodos(){
-        ArrayList<Fabricante> lista = new ArrayList<>();
-        String sql = "SELECT f.id_fabricante,  f.nombre FROM fabricante f";
-        // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql))
-        {
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    // Traducimos de Relacional a Orientado a Objetos (Mapeo)
-                    Fabricante a = new Fabricante(
-
-                            rs.getInt("id_fabricante"),
-                            rs.getString("nombre")
-                    );
-                    lista.add(a); // Añadimos a la lista
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al obtener los fabricante " +  e.getMessage());
-        }
-
-        return lista;
-    }
-
-
-    @Override
-    public Fabricante obtenerPorId(int id) {
-        Fabricante a = null;
-        String sql = "SELECT f.id_fabricante,  f.nombre FROM fabricante  where id_fabricante=?";
+    public ArrayList<Pieza> obtenerTodosArticulo(int id){
+        ArrayList<Pieza> lista = new ArrayList<>();
+        String sql = "SELECT p.id_pieza,  p.nombre FROM pieza p inner join articulopieza ap on ap.id_id_pieza = p.id_pieza" +
+                " where ap.id_articulo = ? = ";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
         try (Connection con = ConexionBD.getInstancia().conectar();
              PreparedStatement pstmt = con.prepareStatement(sql))
@@ -50,23 +23,74 @@ public class FabricanteDAO implements InterfazDAO<Fabricante> {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     // Traducimos de Relacional a Orientado a Objetos (Mapeo)
-                    a = new Fabricante(
+                    Pieza a = new Pieza(
 
-                            rs.getInt("id_fabricante"),
+                            rs.getInt("id_pieza"),
+                            rs.getString("nombre")
+                    );
+                    lista.add(a); // Añadimos a la lista
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener las piezas del articulo  " + id + "" +  e.getMessage());
+        }
+
+        return lista;
+    }
+
+    @Override
+    public ArrayList<Pieza> obtenerTodos() {
+        //forma 1
+        ArrayList<Pieza> lista = new ArrayList<>();
+        String sql = "SELECT id_pieza,  nombre FROM pieza ";
+        // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
+        try (Connection con = ConexionBD.getInstancia().conectar();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                // Traducimos de Relacional a Orientado a Objetos (Mapeo)
+                Pieza a = new Pieza(
+
+                        rs.getInt("id_pieza"),
+                        rs.getString("nombre")
+                );
+                lista.add(a); // Añadimos a la lista
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener artículos: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    @Override
+    public Pieza obtenerPorId(int id) {
+        Pieza a = null;
+        String sql = "SELECT id_pieza,  nombre FROM pieza  where id_pieza=?";
+        // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
+        try (Connection con = ConexionBD.getInstancia().conectar();
+             PreparedStatement pstmt = con.prepareStatement(sql))
+        {
+            pstmt.setInt(1,id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Traducimos de Relacional a Orientado a Objetos (Mapeo)
+                    a = new Pieza(
+
+                            rs.getInt("id_pieza"),
                             rs.getString("nombre")
                     );
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al obtener el fabricante con id : " +id + " " + e.getMessage());
+            System.err.println("Error al obtener el artículo con id : " +id + " " + e.getMessage());
         }
         return a;
     }
 
     @Override
-    public Fabricante obtenerPorNombre(String nombre) {
-        Fabricante a = null;
-        String sql = "SELECT f.id_fabricante,  f.nombre FROM fabricante  where  nombre=?";
+    public Pieza obtenerPorNombre(String nombre) {
+        Pieza a = null;
+        String sql = "SELECT id_pieza,  nombre FROM pieza  where nombre=?";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
         try (Connection con = ConexionBD.getInstancia().conectar();
              PreparedStatement pstmt = con.prepareStatement(sql))
@@ -75,28 +99,28 @@ public class FabricanteDAO implements InterfazDAO<Fabricante> {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     // Traducimos de Relacional a Orientado a Objetos (Mapeo)
-                    a = new Fabricante(
+                    a = new Pieza(
 
-                            rs.getInt("id_fabricante"),
+                            rs.getInt("id_pieza"),
                             rs.getString("nombre")
                     );
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al obtener el fabricante con nombre : " +nombre + " " + e.getMessage());
+            System.err.println("Error al obtener el artículo con nombre : " +nombre + " " + e.getMessage());
         }
         return a;
     }
 
     @Override
-    public boolean insertar(Fabricante fabricante) {
+    public boolean insertar(Pieza pieza) {
         String sql = "INSERT INTO pieza (id_pieza, nombre) VALUES (?, ?, ?, ?)";
 
         try (Connection con = ConexionBD.getInstancia().conectar();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
-            pstmt.setInt(1, fabricante.getId_fab());
-            pstmt.setString(2, fabricante.getNombre());
+            pstmt.setInt(1, pieza.getIdPieza());
+            pstmt.setString(2, pieza.getNombre());
 
 
             return pstmt.executeUpdate() > 0; // Devuelve true si afectó a alguna fila
@@ -107,14 +131,14 @@ public class FabricanteDAO implements InterfazDAO<Fabricante> {
     }
 
     @Override
-    public boolean actualizar(Fabricante fabricante) {
-        String sql = "UPDATE fabricante SET nombre=?  WHERE id_fabricante=?";
+    public boolean actualizar(Pieza pieza) {
+        String sql = "UPDATE pieza SET nombre=?  WHERE id_pieza=?";
 
         try (Connection con = ConexionBD.getInstancia().conectar();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
 
-            pstmt.setString(1, fabricante.getNombre());
+            pstmt.setInt(1, pieza.getIdPieza());
 
 
 
@@ -127,7 +151,7 @@ public class FabricanteDAO implements InterfazDAO<Fabricante> {
 
     @Override
     public boolean eliminar(int id){
-        String sql = "DELETE FROM fabricante WHERE id_fabricante = ?";
+        String sql = "DELETE FROM pieza WHERE id_pieza = ?";
 
         try(Connection con = ConexionBD.getInstancia().conectar();
             PreparedStatement pstmt = con.prepareStatement(sql)){
@@ -136,7 +160,7 @@ public class FabricanteDAO implements InterfazDAO<Fabricante> {
             return pstmt.executeUpdate() > 0;
 
         }catch (SQLException e){
-            System.out.println("Error al eliminar el fabricante con id " + id + " " + e.getMessage());
+            System.out.println("Error al eliminar la pieza con id " + id + " " + e.getMessage());
             return  false;
         }
 

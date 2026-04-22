@@ -1,13 +1,20 @@
 import DAO.ArticuloDAO;
+import DAO.FabricanteDAO;
+import DAO.PiezaDAO;
 import POJO.Articulo;
+import POJO.Fabricante;
 
 public class App {
     static void main() {
         ArticuloDAO articuloDAO = new ArticuloDAO();
+        FabricanteDAO fabricanteDAO = new FabricanteDAO();
+
 
         System.out.println(articuloDAO.obtenerTodos());
 
-        Articulo x = new Articulo(999,"xxxxx", 500, 1);
+        Fabricante f = new Fabricante(100,"Prueba");
+        fabricanteDAO.insertar(f);
+        Articulo x = new Articulo(999,"xxxxx", 500, f);
         if (articuloDAO.insertar(x))
             System.out.println("Funcionó");
 
@@ -18,6 +25,8 @@ public class App {
         System.out.println(articuloDAO.obtenerPorId(999));
         if (articuloDAO.eliminar(999))
             System.out.println("Funcionó");
+
+        fabricanteDAO.insertar(f);
 
     }
 }

@@ -1,30 +1,38 @@
 package DAO;// Archivo: ArticuloDAO.java
 import POJO.Articulo;
+import POJO.Fabricante;
+import DAO.PiezaDAO;
 
 import java.sql.*;
 import java.util.ArrayList;
 
 public class ArticuloDAO implements InterfazDAO<Articulo> {
 
+    PiezaDAO piezaDAO = new PiezaDAO();
 
     @Override
     public ArrayList<Articulo> obtenerTodos() {
+        //forma 1
         ArrayList<Articulo> lista = new ArrayList<>();
-        String sql = "SELECT id_articulo, nombre, precio, id_fab FROM articulos";
-
+        String sql = "SELECT a.id_articulo, a.nombre, a.precio, f.id_fabricante, f.nombre" +
+                " FROM articulos a INNER JOIN fabricante f on a.id_fab=f.id_fabricante";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
         try (Connection con = ConexionBD.getInstancia().conectar();
              PreparedStatement pstmt = con.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
-
             while (rs.next()) {
                 // Traducimos de Relacional a Orientado a Objetos (Mapeo)
+
                 Articulo a = new Articulo(
-                        rs.getInt("id_articulo"),
-                        rs.getString("nombre"),
-                        rs.getInt("precio"),
-                        rs.getInt("id_fab")
+                        rs.getInt("a.id_articulo"),
+                        rs.getString("a.nombre"),
+                        rs.getInt("a.precio"),
+                        new Fabricante(rs.getInt("f.id_fabricante"),
+                                rs.getString("f.nombre")
+                                )
                 );
+
+                a.setPiezas(piezaDAO.obtenerTodosArticulo(a.getIdArticulo()));
                 lista.add(a); // Añadimos a la lista
             }
         } catch (SQLException e) {
@@ -36,7 +44,7 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
     @Override
     public Articulo obtenerPorId(int id) {
         Articulo a = null;
-        String sql = "SELECT id_articulo, nombre, precio, id_fab FROM articulos where id_articulo=?";
+        String sql = "SELECT a.id_articulo, a.nombre, a.precio, a.id_fab, f.nombre FROM articulos a inner join fabricante f on a.id_fab = f.id_fabricante where a.id_articulo=?";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
         try (Connection con = ConexionBD.getInstancia().conectar();
              PreparedStatement pstmt = con.prepareStatement(sql))
@@ -46,11 +54,12 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
                    if (rs.next()) {
                        // Traducimos de Relacional a Orientado a Objetos (Mapeo)
                        a = new Articulo(
-                               rs.getInt("id_articulo"),
-                               rs.getString("nombre"),
-                               rs.getInt("precio"),
-                               rs.getInt("id_fab")
-                       );
+                               rs.getInt("a.id_articulo"),
+                               rs.getString("a.nombre"),
+                               rs.getInt("a.precio"),
+                               new Fabricante(rs.getInt("a.id_fab"),
+                                       rs.getString("f.nombre")));
+
                    }
                }
         } catch (SQLException e) {
@@ -62,7 +71,7 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
     @Override
     public Articulo obtenerPorNombre(String nombre) {
         Articulo a = null;
-        String sql = "SELECT id_articulo, nombre, precio, id_fab FROM articulos where nombre = ?";
+        String sql = "SELECT a.id_articulo, a.nombre, a.precio, a.id_fab, f.nombre FROM articulos a inner join fabricante f on a.id_fab = f.id_fabricante where  a.nombre = ?";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
         try (Connection con = ConexionBD.getInstancia().conectar();
              PreparedStatement pstmt = con.prepareStatement(sql))
@@ -72,11 +81,11 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
                 if (rs.next()) {
                     // Traducimos de Relacional a Orientado a Objetos (Mapeo)
                     a = new Articulo(
-                            rs.getInt("id_articulo"),
-                            rs.getString("nombre"),
-                            rs.getInt("precio"),
-                            rs.getInt("id_fab")
-                    );
+                            rs.getInt("a.id_articulo"),
+                            rs.getString("a.nombre"),
+                            rs.getInt("a.precio"),
+                            new Fabricante(rs.getInt("a.id_fab"),
+                                    rs.getString("f.nombre")));
                 }
             }
         } catch (SQLException e) {
@@ -95,7 +104,7 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
             pstmt.setInt(1, art.getIdArticulo());
             pstmt.setString(2, art.getNombre());
             pstmt.setInt(3, art.getPrecio());
-            pstmt.setInt(4, art.getIdFabricante());
+            pstmt.setInt(4, art.getFabricante().getId_fab());
 
             return pstmt.executeUpdate() > 0; // Devuelve true si afectó a alguna fila
         } catch (SQLException e) {

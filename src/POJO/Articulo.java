@@ -1,18 +1,31 @@
 package POJO;
 
+import java.util.ArrayList;
+
 // Archivo: Articulo.java
 public class Articulo {
     private int idArticulo;
     private String nombre;
     private int precio;
-    private int idFabricante;
+    private Fabricante Fabricante;
+    private ArrayList<Pieza> piezas = new ArrayList<>();
 
     // Constructor
-    public Articulo(int idArticulo, String nombre, int precio, int idFabricante) {
+
+
+    public Articulo(int idArticulo, String nombre, int precio, Fabricante fabricante) {
         this.idArticulo = idArticulo;
         this.nombre = nombre;
         this.precio = precio;
-        this.idFabricante = idFabricante;
+        Fabricante = fabricante;
+    }
+
+    public ArrayList<Pieza> getPiezas() {
+        return piezas;
+    }
+
+    public void setPiezas(ArrayList<Pieza> piezas) {
+        this.piezas = piezas;
     }
 
     // Getters y Setters
@@ -40,12 +53,12 @@ public class Articulo {
         this.precio = precio;
     }
 
-    public int getIdFabricante() {
-        return idFabricante;
+    public Fabricante getFabricante() {
+        return Fabricante;
     }
 
-    public void setIdFabricante(int idFabricante) {
-        this.idFabricante = idFabricante;
+    public void setFabricante(Fabricante fabricante) {
+        Fabricante = fabricante;
     }
 
     @Override
@@ -54,7 +67,8 @@ public class Articulo {
                 "idArticulo=" + idArticulo +
                 ", nombre='" + nombre + '\'' +
                 ", precio=" + precio +
-                ", idFabricante=" + idFabricante +
+                ", Fabricante=" + Fabricante +
+                ", piezas=" + piezas +
                 '}';
     }
 }
