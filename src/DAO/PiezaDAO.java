@@ -11,13 +11,18 @@ import java.util.ArrayList;
 public class PiezaDAO implements InterfazDAO<Pieza> {
 
 
+    private final Connection con;
+
+    public PiezaDAO() throws SQLException{
+        this.con = ConexionBD.getInstancia().getConexion();
+    }
+
+
     public ArrayList<Pieza> obtenerTodosArticulo(int id){
         ArrayList<Pieza> lista = new ArrayList<>();
-        String sql = "SELECT p.id_pieza,  p.nombre FROM pieza p inner join articulopieza ap on ap.id_id_pieza = p.id_pieza" +
-                " where ap.id_articulo = ? = ";
+        String sql = "SELECT p.id_pieza,  p.nombre FROM piezas p where p.id_pieza= ? ";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql))
+        try (PreparedStatement pstmt = con.prepareStatement(sql))
         {
             pstmt.setInt(1,id);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -42,10 +47,9 @@ public class PiezaDAO implements InterfazDAO<Pieza> {
     public ArrayList<Pieza> obtenerTodos() {
         //forma 1
         ArrayList<Pieza> lista = new ArrayList<>();
-        String sql = "SELECT id_pieza,  nombre FROM pieza ";
+        String sql = "SELECT id_pieza,  nombre FROM piezas ";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql);
+        try (PreparedStatement pstmt = con.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 // Traducimos de Relacional a Orientado a Objetos (Mapeo)
@@ -65,10 +69,9 @@ public class PiezaDAO implements InterfazDAO<Pieza> {
     @Override
     public Pieza obtenerPorId(int id) {
         Pieza a = null;
-        String sql = "SELECT id_pieza,  nombre FROM pieza  where id_pieza=?";
+        String sql = "SELECT id_pieza,  nombre FROM piezas  where id_pieza=?";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql))
+        try (PreparedStatement pstmt = con.prepareStatement(sql))
         {
             pstmt.setInt(1,id);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -90,10 +93,9 @@ public class PiezaDAO implements InterfazDAO<Pieza> {
     @Override
     public Pieza obtenerPorNombre(String nombre) {
         Pieza a = null;
-        String sql = "SELECT id_pieza,  nombre FROM pieza  where nombre=?";
+        String sql = "SELECT id_pieza,  nombre FROM piezas  where nombre=?";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql))
+        try (PreparedStatement pstmt = con.prepareStatement(sql))
         {
             pstmt.setString(1,nombre);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -114,10 +116,9 @@ public class PiezaDAO implements InterfazDAO<Pieza> {
 
     @Override
     public boolean insertar(Pieza pieza) {
-        String sql = "INSERT INTO pieza (id_pieza, nombre) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO piezas (id_pieza, nombre) VALUES (?, ?)";
 
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setInt(1, pieza.getIdPieza());
             pstmt.setString(2, pieza.getNombre());
@@ -132,10 +133,9 @@ public class PiezaDAO implements InterfazDAO<Pieza> {
 
     @Override
     public boolean actualizar(Pieza pieza) {
-        String sql = "UPDATE pieza SET nombre=?  WHERE id_pieza=?";
+        String sql = "UPDATE piezas SET nombre=?  WHERE id_pieza=?";
 
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 
 
             pstmt.setInt(1, pieza.getIdPieza());
@@ -151,10 +151,9 @@ public class PiezaDAO implements InterfazDAO<Pieza> {
 
     @Override
     public boolean eliminar(int id){
-        String sql = "DELETE FROM pieza WHERE id_pieza = ?";
+        String sql = "DELETE FROM piezas WHERE id_pieza = ?";
 
-        try(Connection con = ConexionBD.getInstancia().conectar();
-            PreparedStatement pstmt = con.prepareStatement(sql)){
+        try(PreparedStatement pstmt = con.prepareStatement(sql)){
 
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;

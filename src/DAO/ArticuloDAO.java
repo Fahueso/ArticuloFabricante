@@ -1,24 +1,29 @@
 package DAO;// Archivo: ArticuloDAO.java
 import POJO.Articulo;
 import POJO.Fabricante;
-import DAO.PiezaDAO;
 
 import java.sql.*;
 import java.util.ArrayList;
 
 public class ArticuloDAO implements InterfazDAO<Articulo> {
 
+    private final Connection con;
+
+    public ArticuloDAO() throws SQLException{
+        this.con = ConexionBD.getInstancia().getConexion();
+    }
+
     PiezaDAO piezaDAO = new PiezaDAO();
+    ArticuloPiezaDAO apDAO = new ArticuloPiezaDAO();
+
 
     @Override
     public ArrayList<Articulo> obtenerTodos() {
         //forma 1
         ArrayList<Articulo> lista = new ArrayList<>();
-        String sql = "SELECT a.id_articulo, a.nombre, a.precio, f.id_fabricante, f.nombre" +
-                " FROM articulos a INNER JOIN fabricante f on a.id_fab=f.id_fabricante";
+        String sql = "SELECT a.id_articulo, a.nombre , a.precio, f.id_fabricante, f.nombre  FROM articulos a INNER JOIN fabricantes f on a.id_fab=f.id_fabricante";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql);
+        try (PreparedStatement pstmt = con.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 // Traducimos de Relacional a Orientado a Objetos (Mapeo)
@@ -31,8 +36,9 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
                                 rs.getString("f.nombre")
                                 )
                 );
+                a.setPiezas(apDAO.obtenerPiezasDeArticulo(a.getIdArticulo()));
 
-                a.setPiezas(piezaDAO.obtenerTodosArticulo(a.getIdArticulo()));
+
                 lista.add(a); // Añadimos a la lista
             }
         } catch (SQLException e) {
@@ -44,10 +50,9 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
     @Override
     public Articulo obtenerPorId(int id) {
         Articulo a = null;
-        String sql = "SELECT a.id_articulo, a.nombre, a.precio, a.id_fab, f.nombre FROM articulos a inner join fabricante f on a.id_fab = f.id_fabricante where a.id_articulo=?";
+        String sql = "SELECT a.id_articulo, a.nombre, a.precio, f.id_fabricante, f.nombre FROM articulos a inner join fabricantes f on a.id_fab = f.id_fabricante where a.id_articulo=?";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql))
+        try (PreparedStatement pstmt = con.prepareStatement(sql))
               {
                pstmt.setInt(1,id);
                try (ResultSet rs = pstmt.executeQuery()) {
@@ -57,8 +62,11 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
                                rs.getInt("a.id_articulo"),
                                rs.getString("a.nombre"),
                                rs.getInt("a.precio"),
-                               new Fabricante(rs.getInt("a.id_fab"),
+                               new Fabricante(rs.getInt("f.id_fabricante"),
                                        rs.getString("f.nombre")));
+
+                       a.setPiezas(apDAO.obtenerPiezasDeArticulo(a.getIdArticulo()));
+
 
                    }
                }
@@ -71,10 +79,9 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
     @Override
     public Articulo obtenerPorNombre(String nombre) {
         Articulo a = null;
-        String sql = "SELECT a.id_articulo, a.nombre, a.precio, a.id_fab, f.nombre FROM articulos a inner join fabricante f on a.id_fab = f.id_fabricante where  a.nombre = ?";
+        String sql = "SELECT a.id_articulo, a.nombre, a.precio, f.id_fabricante, f.nombre  FROM articulos a inner join fabricantes f on a.id_fab = f.id_fabricante where  a.nombre = ?";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql))
+        try (PreparedStatement pstmt = con.prepareStatement(sql))
         {
             pstmt.setString(1,nombre);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -84,8 +91,11 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
                             rs.getInt("a.id_articulo"),
                             rs.getString("a.nombre"),
                             rs.getInt("a.precio"),
-                            new Fabricante(rs.getInt("a.id_fab"),
+                            new Fabricante(rs.getInt("f.id_fabricante"),
                                     rs.getString("f.nombre")));
+
+                    a.setPiezas(apDAO.obtenerPiezasDeArticulo(a.getIdArticulo()));
+
                 }
             }
         } catch (SQLException e) {
@@ -98,8 +108,7 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
     public boolean insertar(Articulo art) {
         String sql = "INSERT INTO articulos (id_articulo, nombre, precio, id_fab) VALUES (?, ?, ?, ?)";
 
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setInt(1, art.getIdArticulo());
             pstmt.setString(2, art.getNombre());
@@ -117,8 +126,7 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
     public boolean actualizar(Articulo art) {
         String sql = "UPDATE articulos SET nombre=?, precio=? WHERE id_articulo=?";
 
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 
 
             pstmt.setString(1, art.getNombre());
@@ -135,10 +143,12 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
 
     @Override
     public boolean eliminar(int id){
+
+        apDAO.eliminarPiezasArticulo(id);
+
         String sql = "DELETE FROM articulos WHERE id_articulo = ?";
 
-        try(Connection con = ConexionBD.getInstancia().conectar();
-            PreparedStatement pstmt = con.prepareStatement(sql)){
+        try(PreparedStatement pstmt = con.prepareStatement(sql)){
 
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
@@ -149,4 +159,6 @@ public class ArticuloDAO implements InterfazDAO<Articulo> {
         }
 
     }
+
+
 }

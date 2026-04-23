@@ -11,16 +11,21 @@ import java.util.ArrayList;
 public class FabricanteDAO implements InterfazDAO<Fabricante> {
 
 
+    private final Connection con;
+
+    public FabricanteDAO() throws SQLException{
+        this.con = ConexionBD.getInstancia().getConexion();
+    }
+
     public ArrayList<Fabricante> obtenerTodos(){
         ArrayList<Fabricante> lista = new ArrayList<>();
-        String sql = "SELECT f.id_fabricante,  f.nombre FROM fabricante f";
+        String sql = "SELECT f.id_fabricante,  f.nombre FROM fabricantes f";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql))
+        try (PreparedStatement pstmt = con.prepareStatement(sql))
         {
 
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
+                while (rs.next()) {
                     // Traducimos de Relacional a Orientado a Objetos (Mapeo)
                     Fabricante a = new Fabricante(
 
@@ -41,10 +46,9 @@ public class FabricanteDAO implements InterfazDAO<Fabricante> {
     @Override
     public Fabricante obtenerPorId(int id) {
         Fabricante a = null;
-        String sql = "SELECT f.id_fabricante,  f.nombre FROM fabricante  where id_fabricante=?";
+        String sql = "SELECT f.id_fabricante,  f.nombre FROM fabricantes f where f.id_fabricante=?";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql))
+        try (PreparedStatement pstmt = con.prepareStatement(sql))
         {
             pstmt.setInt(1,id);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -66,10 +70,9 @@ public class FabricanteDAO implements InterfazDAO<Fabricante> {
     @Override
     public Fabricante obtenerPorNombre(String nombre) {
         Fabricante a = null;
-        String sql = "SELECT f.id_fabricante,  f.nombre FROM fabricante  where  nombre=?";
+        String sql = "SELECT f.id_fabricante,  f.nombre FROM fabricantes f  where  f.nombre=?";
         // Abrimos la tubería en el propio DAO mediante nuestra clase de apoyo DAO.ConexionBD
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql))
+        try (PreparedStatement pstmt = con.prepareStatement(sql))
         {
             pstmt.setString(1,nombre);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -90,10 +93,9 @@ public class FabricanteDAO implements InterfazDAO<Fabricante> {
 
     @Override
     public boolean insertar(Fabricante fabricante) {
-        String sql = "INSERT INTO pieza (id_pieza, nombre) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO fabricantes (id_fabricante, nombre) VALUES (?, ?)";
 
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setInt(1, fabricante.getId_fab());
             pstmt.setString(2, fabricante.getNombre());
@@ -108,29 +110,27 @@ public class FabricanteDAO implements InterfazDAO<Fabricante> {
 
     @Override
     public boolean actualizar(Fabricante fabricante) {
-        String sql = "UPDATE fabricante SET nombre=?  WHERE id_fabricante=?";
+        String sql = "UPDATE fabricantes SET nombre=? WHERE id_fabricante=?";
 
-        try (Connection con = ConexionBD.getInstancia().conectar();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
-
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setString(1, fabricante.getNombre());
+            pstmt.setInt(2, fabricante.getId_fab());
 
 
 
             return pstmt.executeUpdate() > 0; // Devuelve true si afectó a alguna fila
         } catch (SQLException e) {
-            System.err.println("Error al insertar: " + e.getMessage());
+            System.err.println("Error al actualizar: " + e.getMessage());
             return false;
         }
     }
 
     @Override
     public boolean eliminar(int id){
-        String sql = "DELETE FROM fabricante WHERE id_fabricante = ?";
+        String sql = "DELETE FROM fabricantes WHERE id_fabricante = ?";
 
-        try(Connection con = ConexionBD.getInstancia().conectar();
-            PreparedStatement pstmt = con.prepareStatement(sql)){
+        try(PreparedStatement pstmt = con.prepareStatement(sql)){
 
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
