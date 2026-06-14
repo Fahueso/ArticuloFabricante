@@ -1,0 +1,68 @@
+[
+  {
+    "_id": 1,
+    "nombre": "Teclado",
+    "precio": 399.00,
+    "fabricante": { "id": 3, "nombre": "Logitech" },
+    "piezas": [
+      { "id": 1, "nombre": "Tornillo" }
+    ]
+  },
+  {
+    "_id": 3,
+    "nombre": "Mouse",
+    "precio": 80.00,
+    "fabricante": { "id": 3, "nombre": "Logitech" },
+    "piezas": []
+  },
+  {
+    "_id": 4,
+    "nombre": "Memoria USB",
+    "precio": 140.00,
+    "fabricante": { "id": 4, "nombre": "Lexar" },
+    "piezas": []
+  },
+  {
+    "_id": 5,
+    "nombre": "Memoria RAM",
+    "precio": 290.00,
+    "fabricante": { "id": 1, "nombre": "Kingston" },
+    "piezas": []
+  },
+  {
+    "_id": 6,
+    "nombre": "Disco Duro Extraible 230 GB",
+    "precio": 650.00,
+    "fabricante": { "id": 5, "nombre": "Seagate" },
+    "piezas": []
+  },
+  {
+    "_id": 7,
+    "nombre": "Memoria USB",
+    "precio": 279.00,
+    "fabricante": { "id": 1, "nombre": "Kingston" },
+    "piezas": []
+  },
+  {
+    "_id": 8,
+    "nombre": "DVD ROM",
+    "precio": 450.00,
+    "fabricante": { "id": 2, "nombre": "Desconocido" },
+    "piezas": []
+  },
+  {
+    "_id": 9,
+    "nombre": "CD ROM",
+    "precio": 200.00,
+    "fabricante": { "id": 2, "nombre": "Desconocido" },
+    "piezas": []
+  },
+  {
+    "_id": 10,
+    "nombre": "Tarjeta de red",
+    "precio": 180.00,
+    "fabricante": { "id": 3, "nombre": "Logitech" },
+    "piezas": []
+  }
+]
+``
